@@ -2,11 +2,13 @@ const User = require("../models/users");
 var passport=require("passport");
 var authenticate=require('../authenticate');
 
-function routes(app, db){
+function routes(app, db,lms,accounts){
     app.post("/signup",(req,res,next)=>{
         User.register(
             new User({
               email: req.body.email,
+              user_type:'admin',
+              user_blockchain_account_address:accounts[req.body.number]
             }),
             req.body.password,
             (err, user) => {
@@ -39,7 +41,7 @@ function routes(app, db){
             var token = authenticate.getToken({ _id: user._id });
             res.statusCode = 200;
             res.setHeader("Content-Type", "application/json");
-            res.json({ success: true, status: "Login Successful!", token: token });   
+            res.json({ success: true, status: "Login Successful!", token: token,details:user });   
           }
         
         })(req, res, next);

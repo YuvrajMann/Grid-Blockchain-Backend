@@ -19,10 +19,10 @@ contract Warranty is Ownable{
     The terms and condition assosiated with the warranty
     Stored as IPFS(https://ipfs.io/https://ipfs.io/) hashed string 
     */
-    uint256 public warranty_terms_and_conditions;
+    string public warranty_terms_and_conditions;
 
     //The constructor for smart contract 
-    constructor(uint256 _start_date,uint256 _end_date,uint256 _warranty_terms_and_conditions){
+    constructor(uint256 _start_date,uint256 _end_date,string memory _warranty_terms_and_conditions){
         start_date=_start_date;
         end_date=_end_date;
         warranty_terms_and_conditions=_warranty_terms_and_conditions;

@@ -40,3 +40,13 @@ exports.jwtPassport = passport.use(
 );
 
 exports.verifyUser = passport.authenticate("jwt", { session: false });
+
+exports.verifyAdmin=(req,res,next)=>{
+  if(req.user.user_type=='admin'){
+    next();
+  }
+  else{
+    var err=new Error('User is not admin');
+    next(err);
+  }
+}

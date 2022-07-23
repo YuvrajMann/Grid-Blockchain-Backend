@@ -86,7 +86,7 @@ contract ProductManager{
     } 
 
     //Sign Warranty for product
-    function signWarranty(string memory serial_number,uint256 _start_date,uint256 _end_date,uint256 _warranty_terms_and_conditions) public serialNumberMaps(serial_number)
+    function signWarranty(string memory serial_number,uint256 _start_date,uint256 _end_date,string memory _warranty_terms_and_conditions) public serialNumberMaps(serial_number)
     {
         uint contractProductId=serialNumberMapper[serial_number];
         //Getting warrant object
@@ -139,10 +139,27 @@ contract ProductManager{
     );
 
     //Get details for the product based on serial number
-    function getProduct(string memory serial_number) public serialNumberMaps(serial_number) {
+    function getProduct(string memory serial_number) public serialNumberMaps(serial_number) view returns(address product_address){
         uint contractProductId=serialNumberMapper[serial_number];
         Product _item=items[contractProductId].product_details;
-        emit ItemDetails(_item,uint(items[contractProductId].sold_status),uint(items[contractProductId].warranty_status),uint(items[contractProductId].use_status));
+        // emit ItemDetails(_item,uint(items[contractProductId].sold_status),uint(items[contractProductId].warranty_status),uint(items[contractProductId].use_status));
+        return address(_item);
+    }
+    
+    //Get Sold Staus
+    function prodSoldStaus(string memory serial_number) public serialNumberMaps(serial_number) view returns(uint Sold_Status) {
+            uint contractProductId=serialNumberMapper[serial_number];
+            return uint(items[contractProductId].sold_status);
+    }
+    //Get Warranty Status
+    function prodWarrantyStaus(string memory serial_number) public serialNumberMaps(serial_number) view returns(uint warranty_Status) {
+            uint contractProductId=serialNumberMapper[serial_number];
+            return uint(items[contractProductId].warranty_status);
+    }
+    //Get use status
+function getUseStaus(string memory serial_number) public serialNumberMaps(serial_number) view returns(uint Use_status) {
+            uint contractProductId=serialNumberMapper[serial_number];
+            return uint(items[contractProductId].use_status);
     }
 
     //Event that is emitted when someone want to get warranty details
@@ -154,9 +171,11 @@ contract ProductManager{
     );
 
     //Get warranty for product
-    function getWarranty(string memory serial_number) public serialNumberMaps(serial_number){
+    function getWarranty(string memory serial_number) public serialNumberMaps(serial_number) view returns(address warrnty_address){
         uint contractProductId=serialNumberMapper[serial_number];
         Warranty _product_warranty=items[contractProductId].product_warranty;
-        emit WarantyDetails(_product_warranty,uint(items[contractProductId].sold_status),uint(items[contractProductId].warranty_status),uint(items[contractProductId].use_status));
+        // emit WarantyDetails(_product_warranty,uint(items[contractProductId].sold_status),uint(items[contractProductId].warranty_status),uint(items[contractProductId].use_status));
+        return address(_product_warranty);
     }
+
 }

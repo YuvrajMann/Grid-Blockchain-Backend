@@ -6,6 +6,12 @@ var User = new Schema({
     email: {
         type: String,
     },
+    user_type:{
+        type:String
+    },
+    user_blockchain_account_address:{
+        type:String
+    }
 });
 
 User.plugin(passportLocalMongoose,{ usernameField : 'email' });
