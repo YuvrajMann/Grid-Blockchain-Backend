@@ -16,3 +16,17 @@ DB= [The name of the cloud databse]``<br>
 
 ***Postman link to all API's***
 https://www.getpostman.com/collections/e950ebcd947543d35022 
+
+```mermaid
+sequenceDiagram
+	 Admin ->> Products List : Adds Products  
+	 Buyer ->> Products List : Can view
+	 Buyer ->> Products List : Can buy and own product
+	 Buyer ->> Other Person : Can sell and transfer ownership
+	 Admin ->> Buyer : Can Sign warranty for bought product.
+	 Buyer ->> Products List : Can view warranty status 
+	 Buyer ->> Products List : Can view use status
+	 Admin  ->> Products List : Can view warranty  status
+	 Admin  ->> Products List : Can view use status
+	 Admin  ->> Products List : Can view sold status
+```
