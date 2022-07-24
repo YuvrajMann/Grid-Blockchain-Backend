@@ -4,7 +4,7 @@
 
 1. Clone the repository on your local machine using `git clone https://github.com/YuvrajMann/Grid-Blockchain-Backend.git`
 2.  Run `npm install` to install all dependecies.
-3. Install [ganache-cli](https://github.com/trufflesuite/ganache-cli#readme) on you local machine and run it
+3. Install [ganache-cli](https://www.npmjs.com/package/ganache-cli) on you local machine and run it
 4.  Make a file with name .env and following contents in it    
 ``
 DB= [The name of the cloud databse]``<br>
