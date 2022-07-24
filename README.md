@@ -16,7 +16,7 @@ DB= [The name of the cloud databse]``<br>
 8. Run `npm run start` command to start the server
 
 ***Postman link to all API's***
-https://www.getpostman.com/collections/e950ebcd947543d35022 
+https://www.getpostman.com/collections/5edf8a39b0fd7e949344 
 
 ## Application Flow Diagram
 
