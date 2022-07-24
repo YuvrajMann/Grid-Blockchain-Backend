@@ -157,7 +157,7 @@ contract ProductManager{
             return uint(items[contractProductId].warranty_status);
     }
     //Get use status
-function getUseStaus(string memory serial_number) public serialNumberMaps(serial_number) view returns(uint Use_status) {
+    function getUseStaus(string memory serial_number) public serialNumberMaps(serial_number) view returns(uint Use_status) {
             uint contractProductId=serialNumberMapper[serial_number];
             return uint(items[contractProductId].use_status);
     }
@@ -177,5 +177,4 @@ function getUseStaus(string memory serial_number) public serialNumberMaps(serial
         // emit WarantyDetails(_product_warranty,uint(items[contractProductId].sold_status),uint(items[contractProductId].warranty_status),uint(items[contractProductId].use_status));
         return address(_product_warranty);
     }
-
 }
