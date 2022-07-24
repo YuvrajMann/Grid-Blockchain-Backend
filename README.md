@@ -7,8 +7,8 @@
 3. Install [ganache-cli](https://github.com/trufflesuite/ganache-cli#readme) on you local machine and run it
 4.  Make a file with name .env and following contents in it    
 ``
-DB= [The name of the cloud databse]``
-``LDB=[Name of the local databse]   ``
+DB= [The name of the cloud databse]``<br>
+``LDB=[Name of the local databse]   ``<br>
 ``secretKey=12345-67890-09876-54321``
 5. Install [truffle](https://www.npmjs.com/package/truffle) on your machine
 6. Run command `truffle compile` to compile all smart contracts
