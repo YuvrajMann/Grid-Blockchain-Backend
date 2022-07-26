@@ -119,16 +119,26 @@
 // };
 
 let path=require("path");
+const HDWalletProvider = require('@truffle/hdwallet-provider');
+const fs = require('fs');
+// const mnemonic = fs.readFileSync(".secret").toString().trim();
 
 module.exports = {
   // to customize your Truffle configuration!
   contracts_build_directory: path.join(__dirname, "/build"),
   networks: {
     development: {
-      host: "127.0.0.1",
-      port: 8545,
-      network_id: "*" //Match any network id
-    }
+      host: "127.0.0.1",     // Localhost (default: none)
+      port: 8545,            // Standard Ethereum port (default: none)
+      network_id: "*",       // Any network (default: none)
+    },
+    matic: {
+      provider: () => new HDWalletProvider("sight hold apology tent dirt increase weekend token differ brave spoon run", `https://rpc-mumbai.maticvigil.com`),
+      network_id: 80001,
+      confirmations: 2,
+      timeoutBlocks: 200,
+      skipDryRun: true
+    },
   },
   compilers: {
     solc: {

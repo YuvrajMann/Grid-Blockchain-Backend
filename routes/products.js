@@ -2,6 +2,7 @@ const User = require('../models/users')
 const authenticate = require('../authenticate')
 const productJSON = require('../build/Product.json')
 const warrantyJSON = require('../build/Warranty.json')
+const Product=require('../models/products');
 
 function routes(app, db, lms, web3, accounts) {
   app.post(
@@ -22,10 +23,17 @@ function routes(app, db, lms, web3, accounts) {
           { from: req.user.user_blockchain_account_address },
         )
         .then((_hash, _address) => {
-          res.json({
-            status: 'success',
-            transactionHash: _hash,
-            transactionAddress: _address,
+          Product.create({
+            serial_number:req.body.serial_number
+          }).then((resp)=>{
+            res.json({
+              status: 'success',
+              transactionHash: _hash,
+              transactionAddress: _address,
+            })  
+          })
+          .catch((err)=>{
+            next(err);
           })
         })
         .catch((err) => {
@@ -167,7 +175,7 @@ function routes(app, db, lms, web3, accounts) {
       let serial_number = req.params.serialNumber
    
       lms.product_manager_lms.prodSoldStaus(serial_number, {
-          from:  '0x596436425bAc30F81309A31DF248dD514cDF164d',
+          from:  req.user.user_blockchain_account_address,
         })
         .then(async (result) => {
           res.json({ soldStatus: result })
@@ -224,6 +232,17 @@ function routes(app, db, lms, web3, accounts) {
         .catch((err) => {
           next(err);
         })
+  });
+  
+  app.get('/getSerialNumberList',authenticate.verifyUser,(req,res,next)=>{
+      Product.find({}).then((resp)=>{
+        res.json({
+          data:resp
+        });
+      })
+      .catch((err)=>{
+        next(err);
+      });
   });
 }
 
