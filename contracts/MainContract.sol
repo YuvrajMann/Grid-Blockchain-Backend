@@ -52,6 +52,15 @@ contract ProductManager{
         ProductManager.useStatus use_status;
     }
 
+     struct TransferStruct {
+        address previous_owner;
+        address newOwner;
+        uint256 transactionHash;
+        uint256 blockHash;
+        uint timeStamp;
+        string message;
+    }
+    
     //The unique id for each product
     uint public prod_index;
     constructor(){
@@ -65,6 +74,11 @@ contract ProductManager{
     }
     //Mapping that maps product serial Number to repective prod_index
     mapping (string=>uint) public serialNumberMapper;
+    
+    //Mapping that maps the product serial number to the history of ownership that it had
+    mapping(string => TransferStruct[]) public itemTransaction;
+    
+    string[] public productSerialNumberList;
 
     //Checking if serial number mapping is available  
     modifier serialNumberMaps(string memory serial_number){
@@ -82,9 +96,15 @@ contract ProductManager{
         items[prod_index].warranty_status=warrantyStatus.unsigned;
         //Assinging serial number to the prod_index of the product
         serialNumberMapper[serial_number]=prod_index;
+        //Pushing the serial_number of product to serial_number list
+        productSerialNumberList.push(serial_number);
         prod_index+=1;
     } 
-
+    //Function return all products serial numbers as list
+    function getAllProducts() public view returns (string[] memory) {
+        return productSerialNumberList;
+    }
+    
     //Sign Warranty for product
     function signWarranty(string memory serial_number,uint256 _start_date,uint256 _end_date,string memory _warranty_terms_and_conditions) public serialNumberMaps(serial_number)
     {
@@ -105,6 +125,25 @@ contract ProductManager{
         items[contractProductId].sold_status=SoldStatus.Sold;
         //Changing/Transferring the ownership of product
         items[contractProductId].product_details.alterOwnerShip(newOwner);
+    }
+
+    function saveOwnershipTransferTransaction(
+    string memory serial_number,
+    address previous_owner,
+    address newOwner,
+    uint256 transactionHash,
+    uint256 blockHash,
+    uint256 timeStamp,
+    string memory message) public serialNumberMaps(serial_number){
+        itemTransaction[serial_number].push(
+            TransferStruct(
+                previous_owner,newOwner,transactionHash,blockHash,timeStamp,message
+            )
+        );
+    }
+    
+    function getAllTransferTransactions(string memory serial_number) public view returns (TransferStruct[] memory) {
+        return itemTransaction[serial_number];
     }
 
     //Changing use staus of the product

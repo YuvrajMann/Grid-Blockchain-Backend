@@ -2,9 +2,10 @@ const User = require('../models/users')
 const authenticate = require('../authenticate')
 const productJSON = require('../build/Product.json')
 const warrantyJSON = require('../build/Warranty.json')
-const Product=require('../models/products');
-
 function routes(app, db, lms, web3, accounts) {
+  //Route for creating a new item to product list
+  //Parameters to be passed: 
+  //display_name,price,image_url,retailer_name,purchase_date,maufacturer
   app.post(
     '/createNewItem',
     authenticate.verifyUser,
@@ -41,7 +42,9 @@ function routes(app, db, lms, web3, accounts) {
         })
     },
   )
-
+   
+  // Route for singing the warranty
+  // Parameters : serial_number,start_date,end_date,warranty_terms_and_conditions
   app.post(
     '/signWarranty',
     authenticate.verifyUser,
@@ -67,13 +70,17 @@ function routes(app, db, lms, web3, accounts) {
         })
     },
   )
-
+  
+  // Route for selling the product
+  // Parameters : serial_number,new owner blockchain address
+  
   app.post('/sellProduct', authenticate.verifyUser, (req, res, next) => {
     lms.product_manager_lms
       .sellProduct(req.body.serial_number, req.body.new_owner, {
         from: req.user.user_blockchain_account_address,
       })
       .then((_hash, _address) => {
+        lms.product_manager_lms.Contract
         res.json({
           status: 'Successfully sold product',
           transactionHash: _hash,
@@ -235,14 +242,14 @@ function routes(app, db, lms, web3, accounts) {
   });
   
   app.get('/getSerialNumberList',authenticate.verifyUser,(req,res,next)=>{
-      Product.find({}).then((resp)=>{
-        res.json({
-          data:resp
-        });
-      })
-      .catch((err)=>{
-        next(err);
-      });
+    lms.product_manager_lms.getAllProducts({
+      from: req.user.user_blockchain_account_address,
+    }).then((result)=>{
+      res.json({ 'product_list': result});
+    })
+    .catch((err)=>{
+      next(err);
+    });
   });
 }
 
