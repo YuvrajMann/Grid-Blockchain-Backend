@@ -52,11 +52,11 @@ contract ProductManager{
         ProductManager.useStatus use_status;
     }
 
+    //Struct of the transaction that has happened
      struct TransferStruct {
-        address previous_owner;
         address newOwner;
-        uint256 transactionHash;
-        uint256 blockHash;
+        bytes32 transactionHash;
+        bytes32 blockHash;
         uint timeStamp;
         string message;
     }
@@ -129,15 +129,14 @@ contract ProductManager{
 
     function saveOwnershipTransferTransaction(
     string memory serial_number,
-    address previous_owner,
     address newOwner,
-    uint256 transactionHash,
-    uint256 blockHash,
+    bytes32  transactionHash,
+    bytes32  blockHash,
     uint256 timeStamp,
     string memory message) public serialNumberMaps(serial_number){
         itemTransaction[serial_number].push(
             TransferStruct(
-                previous_owner,newOwner,transactionHash,blockHash,timeStamp,message
+                newOwner,transactionHash,blockHash,timeStamp,message
             )
         );
     }
@@ -145,7 +144,7 @@ contract ProductManager{
     function getAllTransferTransactions(string memory serial_number) public view returns (TransferStruct[] memory) {
         return itemTransaction[serial_number];
     }
-
+    
     //Changing use staus of the product
     function changingUseStaus(string memory serial_number,uint newUseStaus) public serialNumberMaps(serial_number){
         uint contractProductId=serialNumberMapper[serial_number];

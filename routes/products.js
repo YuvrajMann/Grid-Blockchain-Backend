@@ -2,16 +2,18 @@ const User = require('../models/users')
 const authenticate = require('../authenticate')
 const productJSON = require('../build/Product.json')
 const warrantyJSON = require('../build/Warranty.json')
+let axios = require('axios')
+
 function routes(app, db, lms, web3, accounts) {
   //Route for creating a new item to product list
-  //Parameters to be passed: 
+  //Parameters to be passed:
   //display_name,price,image_url,retailer_name,purchase_date,maufacturer
   app.post(
     '/createNewItem',
     authenticate.verifyUser,
     authenticate.verifyAdmin,
     (req, res, next) => {
-      console.log(lms)
+      console.log(req.user.user_blockchain_account_address)
       lms.product_manager_lms
         .addProduct(
           req.body.serial_number,
@@ -24,25 +26,24 @@ function routes(app, db, lms, web3, accounts) {
           { from: req.user.user_blockchain_account_address },
         )
         .then((_hash, _address) => {
-          Product.create({
-            serial_number:req.body.serial_number
-          }).then((resp)=>{
-            res.json({
-              status: 'success',
-              transactionHash: _hash,
-              transactionAddress: _address,
-            })  
-          })
-          .catch((err)=>{
-            next(err);
-          })
+          lms.product_manager_lms.sellProduct(req.body.serial_number,req.user.user_blockchain_account_address
+            ,{ from: req.user.user_blockchain_account_address }).then((resp)=>{
+              res.json({
+                status: 'success',
+                transactionHash: _hash,
+                transactionAddress: _address,
+              })    
+            })
+            .catch((err)=>{
+              next(err);
+            })
         })
         .catch((err) => {
           next(err)
         })
     },
   )
-   
+
   // Route for singing the warranty
   // Parameters : serial_number,start_date,end_date,warranty_terms_and_conditions
   app.post(
@@ -70,27 +71,67 @@ function routes(app, db, lms, web3, accounts) {
         })
     },
   )
-  
+
   // Route for selling the product
   // Parameters : serial_number,new owner blockchain address
-  
+
   app.post('/sellProduct', authenticate.verifyUser, (req, res, next) => {
     lms.product_manager_lms
       .sellProduct(req.body.serial_number, req.body.new_owner, {
         from: req.user.user_blockchain_account_address,
       })
       .then((_hash, _address) => {
-        lms.product_manager_lms.Contract
-        res.json({
-          status: 'Successfully sold product',
-          transactionHash: _hash,
-          transactionAddress: _address,
-        })
+        console.log(_hash.receipt)
+
+        let timestamp = Math.floor(+new Date() / 1000)
+
+        lms.product_manager_lms
+          .saveOwnershipTransferTransaction(
+            req.body.serial_number,
+            req.body.new_owner,
+            _hash.receipt.transactionHash,
+            _hash.receipt.blockHash,
+            timestamp,
+            req.body.message,
+            {
+              from: req.user.user_blockchain_account_address,
+            },
+          )
+          .then((result) => {
+            res.json({
+              status: 'Successfully sold product',
+              transactionHash: _hash,
+              transactionAddress: _address,
+            })
+          })
+          .catch((err) => {
+            console.log('First One')
+            next(err)
+          })
       })
       .catch((err) => {
+        console.log('Second One')
         next(err)
       })
   })
+
+  app.get(
+    '/getAllOwnerShipTransferTransactions/:serialNumber',
+    authenticate.verifyUser,
+    (req, res, next) => {
+      let serial_number = req.params.serialNumber
+      lms.product_manager_lms
+        .getAllTransferTransactions(serial_number)
+        .then((resp) => {
+          res.json({
+            transactions: resp,
+          })
+        })
+        .catch((err) => {
+          next(err)
+        })
+    },
+  )
 
   app.post(
     '/getWarranty/:serialNumber',
@@ -124,6 +165,57 @@ function routes(app, db, lms, web3, accounts) {
         })
     },
   )
+
+  app.get('/getOwnedItemsByUser', authenticate.verifyUser, (req, res, next) => {
+    let user_address = req.user.user_blockchain_account_address
+    lms.product_manager_lms
+      .getAllProducts({
+        from: req.user.user_blockchain_account_address,
+      })
+      .then(async (result) => {
+        console.log(result);
+        let myPromise = new Promise(function (myResolve, myReject) {
+          let result_arr = []
+          for (let i = 0; i < result.length; ++i) {
+            let serial = result[i]
+            lms.product_manager_lms
+              .getProduct(serial, {
+                from: req.user.user_blockchain_account_address,
+              })
+              .then(async (result1) => {
+                const contract_instance = new web3.eth.Contract(
+                  productJSON.abi,
+                  result1,
+                )
+                let owner = await contract_instance.methods._owner().call()
+                // console.log(owner,user_address);
+                if (owner == user_address) {
+                  result_arr.push(serial)
+                }
+               
+                if (i == result.length-1) {
+                  myResolve(result_arr)
+                }
+              })
+              .catch((err) => {
+                myReject(err)
+              })
+          }
+        })
+        myPromise
+          .then((resp) => {
+            res.json({
+              owned_products: resp,
+            })
+          })
+          .catch((err) => {
+            next(err)
+          })
+      })
+      .catch((err) => {
+        next(err)
+      })
+  })
 
   app.post(
     '/getProduct/:serialNumber',
@@ -178,11 +270,11 @@ function routes(app, db, lms, web3, accounts) {
     '/getSoldStaus/:serialNumber',
     authenticate.verifyUser,
     (req, res, next) => {
-      
       let serial_number = req.params.serialNumber
-   
-      lms.product_manager_lms.prodSoldStaus(serial_number, {
-          from:  req.user.user_blockchain_account_address,
+
+      lms.product_manager_lms
+        .prodSoldStaus(serial_number, {
+          from: req.user.user_blockchain_account_address,
         })
         .then(async (result) => {
           res.json({ soldStatus: result })
@@ -226,31 +318,36 @@ function routes(app, db, lms, web3, accounts) {
         })
     },
   )
-  app.post("/setUseStatus/:serialNumber",authenticate.verifyUser,
-  (req,res,next)=>{
-    let serial_number = req.params.serialNumber
-    lms.product_manager_lms
-        .changingUseStaus(serial_number,req.body.newStatus, {
+  app.post(
+    '/setUseStatus/:serialNumber',
+    authenticate.verifyUser,
+    (req, res, next) => {
+      let serial_number = req.params.serialNumber
+      lms.product_manager_lms
+        .changingUseStaus(serial_number, req.body.newStatus, {
           from: req.user.user_blockchain_account_address,
         })
         .then(async (result) => {
-          res.json({ status: 'Use Status updated successfully'});
+          res.json({ status: 'Use Status updated successfully' })
         })
         .catch((err) => {
-          next(err);
+          next(err)
         })
-  });
-  
-  app.get('/getSerialNumberList',authenticate.verifyUser,(req,res,next)=>{
-    lms.product_manager_lms.getAllProducts({
-      from: req.user.user_blockchain_account_address,
-    }).then((result)=>{
-      res.json({ 'product_list': result});
-    })
-    .catch((err)=>{
-      next(err);
-    });
-  });
+    },
+  )
+
+  app.get('/getSerialNumberList', authenticate.verifyUser, (req, res, next) => {
+    lms.product_manager_lms
+      .getAllProducts({
+        from: req.user.user_blockchain_account_address,
+      })
+      .then((result) => {
+        res.json({ product_list: result })
+      })
+      .catch((err) => {
+        next(err)
+      })
+  })
 }
 
 module.exports = routes
