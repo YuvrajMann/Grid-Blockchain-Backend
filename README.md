@@ -33,3 +33,6 @@ sequenceDiagram
 	 Admin  ->> Products List : Can view use status
 	 Admin  ->> Products List : Can view sold status
 ```
+## Application Architecture
+<img width="349" alt="image" src="https://user-images.githubusercontent.com/66714991/181746623-f981aa87-af07-485a-8322-2c34b4a1a8f1.png">
+
