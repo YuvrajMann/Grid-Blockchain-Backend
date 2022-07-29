@@ -5,7 +5,7 @@ pragma solidity ^0.8.1;
 import "./Ownable.sol";
 
 // Smart Contract for product warranty
-contract Warranty is Ownable{
+contract Warranty{
     /*
     The date and time is stored here in form os unix timestamp(https://www.unixtimestamp.com/) as unit256 variable type
     The start date for warranty

@@ -54,10 +54,15 @@ contract ProductManager{
 
     //Struct of the transaction that has happened
      struct TransferStruct {
+        //The new owner of product
         address newOwner;
+        //The transaction hash
         bytes32 transactionHash;
+        //The block hash
         bytes32 blockHash;
+        //The time stamp when the transaction has happened
         uint timeStamp;
+        //The additional comments assosiated with transaction
         string message;
     }
     
@@ -86,9 +91,9 @@ contract ProductManager{
         _;
     }
     //Utility function that adds a new product to blockchain
-    function addProduct(string memory serial_number,string memory display_name,uint256 _price,string memory _image,string memory _retailer,uint256 _purchase_date,string memory _manufacturer) public{
+    function addProduct(address owner,string memory serial_number,string memory display_name,uint256 _price,string memory _image,string memory _retailer,uint256 _purchase_date,string memory _manufacturer) public{
         //Creating a product object
-        Product _product=new Product(serial_number,_price,_image,_retailer,display_name,_purchase_date,_manufacturer);
+        Product _product=new Product(owner,serial_number,_price,_image,_retailer,display_name,_purchase_date,_manufacturer);
         //Assinging product to its repective prod_index
         items[prod_index].product_details=_product;
         //Intially product is unsold and warrant is unsigned
@@ -117,16 +122,25 @@ contract ProductManager{
         items[contractProductId].warranty_status=warrantyStatus.signed;
         items[contractProductId].use_status=useStatus.inUse;
     }
-
-    //Utility function that sells to product and assign a new owner to product
-    function sellProduct(string memory serial_number,address newOwner) public serialNumberMaps(serial_number){
+     //Utility function that sells to product and assign a new owner to product
+    function assignProductToAdmin(string memory serial_number,address newOwner) public serialNumberMaps(serial_number){
         uint contractProductId=serialNumberMapper[serial_number];
         //Changing the product sold status to sold
         items[contractProductId].sold_status=SoldStatus.Sold;
         //Changing/Transferring the ownership of product
-        items[contractProductId].product_details.alterOwnerShip(newOwner);
+        items[contractProductId].product_details.alterOwnerShip(msg.sender,newOwner);
     }
 
+    //Utility function that sells to product and assign a new owner to product
+    function sellProduct(string memory serial_number,address sender,address newOwner) public serialNumberMaps(serial_number){
+        uint contractProductId=serialNumberMapper[serial_number];
+        //Changing the product sold status to sold
+        items[contractProductId].sold_status=SoldStatus.Sold;
+        //Changing/Transferring the ownership of product
+        items[contractProductId].product_details.alterOwnerShip(sender,newOwner);
+    }
+
+    //Utility function that is used to save the buy/sell transaction performed on a product
     function saveOwnershipTransferTransaction(
     string memory serial_number,
     address newOwner,
@@ -134,13 +148,15 @@ contract ProductManager{
     bytes32  blockHash,
     uint256 timeStamp,
     string memory message) public serialNumberMaps(serial_number){
+        //itemTranction for a particular serial number is pushed
         itemTransaction[serial_number].push(
             TransferStruct(
                 newOwner,transactionHash,blockHash,timeStamp,message
             )
         );
     }
-    
+
+    //Function returns all previous transaction for a product
     function getAllTransferTransactions(string memory serial_number) public view returns (TransferStruct[] memory) {
         return itemTransaction[serial_number];
     }

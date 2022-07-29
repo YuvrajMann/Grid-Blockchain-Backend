@@ -22,13 +22,14 @@ contract Product is Ownable{
 
 
     constructor(
+        address owner,
         string memory _prodId,
         uint256 _price,
         string memory _image,
         string memory _retailerName,
         string memory _prodDisplayName,
         uint256 _purchase_date,
-        string memory _manufacturer){
+        string memory _manufacturer)Ownable(owner){
             prodId=_prodId;
             price=_price;
             image=_image;

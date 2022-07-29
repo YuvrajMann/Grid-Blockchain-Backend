@@ -16,6 +16,7 @@ function routes(app, db, lms, web3, accounts) {
       console.log(req.user.user_blockchain_account_address)
       lms.product_manager_lms
         .addProduct(
+          req.user.user_blockchain_account_address,
           req.body.serial_number,
           req.body.display_name,
           req.body.price,
@@ -26,17 +27,11 @@ function routes(app, db, lms, web3, accounts) {
           { from: req.user.user_blockchain_account_address },
         )
         .then((_hash, _address) => {
-          lms.product_manager_lms.sellProduct(req.body.serial_number,req.user.user_blockchain_account_address
-            ,{ from: req.user.user_blockchain_account_address }).then((resp)=>{
-              res.json({
-                status: 'success',
-                transactionHash: _hash,
-                transactionAddress: _address,
-              })    
-            })
-            .catch((err)=>{
-              next(err);
-            })
+            res.json({
+              status: 'success',
+              transactionHash: _hash,
+              transactionAddress: _address,
+            })    
         })
         .catch((err) => {
           next(err)
@@ -77,7 +72,7 @@ function routes(app, db, lms, web3, accounts) {
 
   app.post('/sellProduct', authenticate.verifyUser, (req, res, next) => {
     lms.product_manager_lms
-      .sellProduct(req.body.serial_number, req.body.new_owner, {
+      .sellProduct(req.body.serial_number,req.user.user_blockchain_account_address ,req.body.new_owner, {
         from: req.user.user_blockchain_account_address,
       })
       .then((_hash, _address) => {
