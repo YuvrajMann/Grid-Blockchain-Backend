@@ -71,7 +71,6 @@ function routes(app, db, lms, web3, accounts) {
   // Parameters : serial_number,new owner blockchain address
 
   app.post('/sellProduct', authenticate.verifyUser, (req, res, next) => {
-    
     lms.product_manager_lms
       .sellProduct(req.body.serial_number,req.user.user_blockchain_account_address ,req.body.new_owner, {
         from: req.user.user_blockchain_account_address,
