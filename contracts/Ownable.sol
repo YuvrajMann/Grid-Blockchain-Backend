@@ -9,7 +9,9 @@ contract Ownable {
     constructor(address owner){
         _owner = owner;
     }
-
+    function getOwner() public view returns (address){
+        return _owner;
+    }
     /**
     * @dev Throws if called by any account other than the owner.
     */

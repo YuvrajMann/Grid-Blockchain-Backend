@@ -137,7 +137,8 @@ contract ProductManager{
         //Changing the product sold status to sold
         items[contractProductId].sold_status=SoldStatus.Sold;
         //Changing/Transferring the ownership of product
-        items[contractProductId].product_details.alterOwnerShip(sender,newOwner);
+          address myowner=items[contractProductId].product_details.getOwner();
+        items[contractProductId].product_details.alterOwnerShip(myowner,newOwner);
     }
 
     //Utility function that is used to save the buy/sell transaction performed on a product
