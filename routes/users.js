@@ -7,7 +7,7 @@ function routes(app, db,lms,accounts){
         User.register(
             new User({
               email: req.body.email,
-              user_type:'normal',
+              user_type:'admin',
               user_blockchain_account_address:accounts[req.body.number]
             }),
             req.body.password,
