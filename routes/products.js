@@ -69,7 +69,6 @@ function routes(app, db, lms, web3, accounts) {
 
   // Route for selling the product
   // Parameters : serial_number,new owner blockchain address
-
   app.post('/sellProduct', authenticate.verifyUser, (req, res, next) => {
     lms.product_manager_lms
       .sellProduct(req.body.serial_number,req.user.user_blockchain_account_address ,req.body.new_owner, {
@@ -110,6 +109,8 @@ function routes(app, db, lms, web3, accounts) {
       })
   })
 
+  // Route for  get list of all ownership transfer transactions
+  // Parameters : serial_number,new owner blockchain address
   app.get(
     '/getAllOwnerShipTransferTransactions/:serialNumber',
     authenticate.verifyUser,
@@ -127,7 +128,9 @@ function routes(app, db, lms, web3, accounts) {
         })
     },
   )
-
+   
+  //Route for getting the warranty details of product 
+  //Parameters - serial_number
   app.post(
     '/getWarranty/:serialNumber',
     authenticate.verifyUser,
@@ -160,7 +163,8 @@ function routes(app, db, lms, web3, accounts) {
         })
     },
   )
-
+  
+  //Route is used to fetch the owned items by a particular user
   app.get('/getOwnedItemsByUser', authenticate.verifyUser, (req, res, next) => {
     let user_address = req.user.user_blockchain_account_address
     lms.product_manager_lms
@@ -212,6 +216,7 @@ function routes(app, db, lms, web3, accounts) {
       })
   })
 
+  //Route of getting the details of a particular product using its serial number
   app.post(
     '/getProduct/:serialNumber',
     authenticate.verifyUser,
@@ -260,7 +265,8 @@ function routes(app, db, lms, web3, accounts) {
         })
     },
   )
-
+  
+  //Used for getting sold status of product
   app.get(
     '/getSoldStaus/:serialNumber',
     authenticate.verifyUser,
@@ -279,6 +285,8 @@ function routes(app, db, lms, web3, accounts) {
         })
     },
   )
+
+  //Getting warranty status
   app.get(
     '/getWarrantyStatus/:serialNumber',
     authenticate.verifyUser,
@@ -296,6 +304,8 @@ function routes(app, db, lms, web3, accounts) {
         })
     },
   )
+
+  //Getting use status of product
   app.get(
     '/getUseStatus/:serialNumber',
     authenticate.verifyUser,
@@ -313,6 +323,7 @@ function routes(app, db, lms, web3, accounts) {
         })
     },
   )
+
   app.post(
     '/setUseStatus/:serialNumber',
     authenticate.verifyUser,
@@ -330,7 +341,8 @@ function routes(app, db, lms, web3, accounts) {
         })
     },
   )
-
+  
+  //Returns a list of serial numbers of all pproduct that are present on blockchain
   app.get('/getSerialNumberList', authenticate.verifyUser, (req, res, next) => {
     lms.product_manager_lms
       .getAllProducts({
